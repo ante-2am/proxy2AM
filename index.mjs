@@ -1,5 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import cors from 'cors';
 import { SignJWT } from 'jose';
 
 // Validate environment variables
@@ -20,6 +21,14 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+
+// CORS configuration
+app.use(cors({
+  origin: 'https://www.2am-connect.com',
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept']
+}));
 
 // Helper function to extract IP address
 function getClientIp(req) {
