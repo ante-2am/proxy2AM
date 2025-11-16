@@ -19,6 +19,9 @@ const jwtSecret = new TextEncoder().encode(JWT_SECRET);
 
 const app = express();
 
+// Trust proxy (important for rate limiting behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json());
 
@@ -91,6 +94,20 @@ const contactRateLimiter = rateLimit({
   message: { ok: false, error: 'Too many requests, please try again later' },
   handler: (req, res) => {
     res.status(429).json({ ok: false, error: 'Too many requests, please try again later' });
+  },
+  // Custom key generator to safely handle x-forwarded-for header
+  keyGenerator: (req) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded && typeof forwarded === 'string') {
+      // Take the first IP from the comma-separated list
+      const firstIp = forwarded.split(',')[0].trim();
+      // Validate it's a valid IP format (basic check)
+      if (firstIp && /^[\d.]+$/.test(firstIp)) {
+        return firstIp;
+      }
+    }
+    // Fallback to socket remote address
+    return req.ip || req.socket.remoteAddress || 'unknown';
   }
 });
 
@@ -146,7 +163,10 @@ app.post('/contact', contactRateLimiter, async (req, res) => {
       });
 
       if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unable to read error response');
         console.error(`n8n webhook returned status ${response.status}`);
+        console.error(`n8n webhook URL: ${N8N_WEBHOOK_URL}`);
+        console.error(`n8n error response: ${errorText}`);
         return res.status(500).json({ ok: false, error: 'n8n error' });
       }
 
