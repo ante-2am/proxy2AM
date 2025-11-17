@@ -72,8 +72,10 @@ Submit a contact form message. This endpoint is rate-limited to 3 requests per 6
   "phone": "+49 123 456789",
   "honeypot": "",
   "privacyConsent": true,
+  "whatsappConsent": true,
   "userAgent": "Mozilla/5.0...",
-  "language": "de-DE"
+  "language": "de-DE",
+  "timestamp": "2024-11-17T10:30:00.000Z"
 }
 ```
 
@@ -85,9 +87,11 @@ Submit a contact form message. This endpoint is rate-limited to 3 requests per 6
 - `privacyConsent` (boolean, required) - Must be `true` to indicate privacy policy consent
 - `company` (string, optional) - Company name
 - `phone` (string, optional) - Phone number
+- `whatsappConsent` (boolean, optional) - Indicates if the user wants follow-up via WhatsApp
 - `honeypot` (string, optional) - Spam protection field. If this field is filled, the request will be rejected as spam. The frontend should include this field but leave it empty.
 - `userAgent` (string, optional) - Browser user agent (will fall back to request header if not provided)
 - `language` (string, optional) - Browser language preference
+- `timestamp` (string, optional) - Client-side timestamp when the form was submitted (ISO format)
 
 **Success Response (200):**
 ```json

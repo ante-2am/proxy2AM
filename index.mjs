@@ -43,6 +43,16 @@ function getClientIp(req) {
   return req.socket.remoteAddress || 'unknown';
 }
 
+function toBoolean(value) {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return value.toLowerCase() === 'true';
+  }
+  return false;
+}
+
 // Helper function to validate contact form body
 function validateContactBody(body) {
   const errors = [];
@@ -71,7 +81,7 @@ function validateContactBody(body) {
   }
 
   // Check privacy consent
-  if (body.privacyConsent !== true) {
+  if (toBoolean(body.privacyConsent) !== true) {
     errors.push('Privacy consent is required');
   }
 
@@ -137,10 +147,13 @@ app.post('/contact', contactRateLimiter, async (req, res) => {
       // Optional form fields
       company: req.body.company ? req.body.company.trim() : null,
       phone: req.body.phone ? req.body.phone.trim() : null,
+      whatsappConsent: toBoolean(req.body.whatsappConsent),
+      privacyConsent: toBoolean(req.body.privacyConsent),
       // Metadata
       ip: getClientIp(req),
       userAgent: userAgent,
       language: req.body.language || null,
+      timestamp: req.body.timestamp || null,
       createdAt: new Date().toISOString()
     };
 
